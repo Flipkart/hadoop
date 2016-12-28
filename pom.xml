@@ -100,11 +100,11 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
     <module>hadoop-hdfs-project</module>
     <module>hadoop-yarn-project</module>
     <module>hadoop-mapreduce-project</module>
+    <module>flipkart-guardrails</module>
     <module>hadoop-tools</module>
     <module>hadoop-dist</module>
     <module>hadoop-client</module>
     <module>hadoop-minicluster</module>
-    <module>flipkart-guardrails</module>
   </modules>
 
   <build>
