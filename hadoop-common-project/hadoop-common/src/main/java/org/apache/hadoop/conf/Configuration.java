@@ -31,6 +31,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Constructor;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.util.ArrayList;
@@ -680,6 +681,29 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     updatingResource = new HashMap<String, String[]>();
     synchronized(Configuration.class) {
       REGISTRY.put(this, null);
+    }
+    initializeWithDefaultFdpConfiguration();
+  }
+
+  private void initializeWithDefaultFdpConfiguration() {
+    if ( this.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF) == null) {
+      throw new RuntimeException("ProcessId not set");
+    }
+    try {
+      LOG.info(String.format("Creating instance of %s ",DfsClientConfigurationProvider.DFS_DEFAULT_CONF_CLASS_VALUE));
+      Class cls = Class.forName(DfsClientConfigurationProvider.DFS_DEFAULT_CONF_CLASS_VALUE);
+      if (!cls.isAssignableFrom(DfsClientConfigurationProvider.class)) {
+        throw new RuntimeException(String.format("%s does not implemented %s",cls.getName(),
+                DfsClientConfigurationProvider.class));
+      }
+      Constructor constructor =cls.getConstructor(Long.class);
+      Long processId = Long.parseLong(this.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF));
+      DfsClientConfigurationProvider dfsClientConfigurationProvider = (DfsClientConfigurationProvider)
+              constructor.newInstance(processId);
+      dfsClientConfigurationProvider.loadDefaultDfsConfiguration(this);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
     }
   }
   
