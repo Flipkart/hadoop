@@ -34,6 +34,17 @@
 
     <description>FDP Flipkart HDFS Guardrails</description>
     <name>FDP Flipkart HDFS Guardrails</name>
+
+    <repositories>
+    <repository>
+        <id>flipkart-release</id>
+        <url>http://artifactory.nm.flipkart.com:8081/artifactory/libs-release/</url>
+    </repository>
+    <repository>
+        <id>flipkart-snapshot</id>
+        <url>http://artifactory.nm.flipkart.com:8081/artifactory/libs-snapshot/</url>
+     </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.apache.hadoop</groupId>
@@ -58,7 +69,7 @@
         <dependency>
             <groupId>com.flipkart.fdp</groupId>
             <artifactId>fdp-cfg-util</artifactId>
-            <version>1.0.3</version>
+            <version>1.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.ning</groupId>
@@ -112,26 +123,11 @@
             <artifactId>google-collections</artifactId>
             <version>1.0</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
         <dependency>
-            <groupId>com.mashape.unirest</groupId>
-            <artifactId>unirest-java</artifactId>
-            <version>1.4.7</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.4.1</version>
-        </dependency>
-        <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpmime</artifactId>
-        <version>4.4.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4</version>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
         </dependency>
     </dependencies>
     <build>

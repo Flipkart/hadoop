@@ -1,6 +1,5 @@
 package com.flipkart.fdp;
 
-import com.flipkart.fdp.utils.cfg.ConfigServiceImpl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -82,7 +81,6 @@ public class BadgerClient {
 
   private String bucketName;
   private String badgerURL;
-  private final ConfigServiceImpl cs = new ConfigServiceImpl();
   private ExponentialBackoffRetry retryPolicy;
   private int requestTimeoutMillis;
 
@@ -97,7 +95,7 @@ public class BadgerClient {
     //TODO: OR is it maybe cause of the Sl4j thing.. thats been used inside configServiceImpl
     //TODO: Issue is even after the last line if executed in main, the application is still running
 
-    badgerURL = HTTP + "10.32.217.186:28220";
+    badgerURL = HTTP + "10.34.57.183:28220";
 
     if (badgerURL == null) {
       throw new RuntimeException(BADGER_HOST_PORT_KEY + " key not found in " + bucketName + " config bucket");

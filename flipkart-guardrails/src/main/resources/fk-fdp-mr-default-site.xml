@@ -6,7 +6,7 @@
     </property>
     <property>
         <name>mapreduce.application.framework.path</name>
-        <value>/projects/pranavtesting/hadoop-2.6.0.tar.gz</value>
+        <value>/projects/mukund/hadoop-2.6.0.tar.gz</value>
     </property>
     <property>
         <name>mapreduce.application.classpath</name>

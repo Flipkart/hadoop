@@ -6,8 +6,8 @@ public class Uri
     {
     }
 
-    public static String getProcessData(String hostPort, Long processId)
+    public static String getProcessData(Long processId)
     {
-        return String.format("http://%s/view/%s", hostPort, processId);
+        return String.format("/view/%s", processId);
     }
 }

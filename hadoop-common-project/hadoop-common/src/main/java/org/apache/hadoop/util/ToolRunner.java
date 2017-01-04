@@ -19,6 +19,7 @@ package org.apache.hadoop.util;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
@@ -64,10 +65,31 @@ public class ToolRunner {
     GenericOptionsParser parser = new GenericOptionsParser(conf, args);
     //set the configuration back, so that Tool can configure itself
     tool.setConf(conf);
-    
+    //initializing default fdp configuration
+    initializeWithDefaultFdpConfiguration(tool.getConf());
     //get the args w/o generic hadoop args
     String[] toolArgs = parser.getRemainingArgs();
     return tool.run(toolArgs);
+  }
+  private static void initializeWithDefaultFdpConfiguration(Configuration configuration) {
+    if ( configuration.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF) == null) {
+      throw new RuntimeException("ProcessId not set");
+    }
+    try {
+      Class cls = Class.forName(DfsClientConfigurationProvider.DFS_DEFAULT_CONF_CLASS_VALUE);
+      if (!DfsClientConfigurationProvider.class.isAssignableFrom(cls)) {
+        throw new RuntimeException(String.format("%s does not implemented %s",cls.getName(),
+                DfsClientConfigurationProvider.class));
+      }
+      Constructor constructor =cls.getConstructor(Long.class);
+      Long processId = Long.parseLong(configuration.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF));
+      DfsClientConfigurationProvider dfsClientConfigurationProvider = (DfsClientConfigurationProvider)
+              constructor.newInstance(processId);
+      dfsClientConfigurationProvider.loadDefaultDfsConfiguration(configuration);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
   }
   
   /**

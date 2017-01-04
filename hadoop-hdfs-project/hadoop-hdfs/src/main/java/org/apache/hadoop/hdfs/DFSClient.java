@@ -2016,7 +2016,7 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
    * @see ClientProtocol#getFileInfo(String) for description of exceptions
    */
   public HdfsFileStatus getFileInfo(String src) throws IOException {
-    dfsClientGuardrails.canReadFromLocation(src);
+//    dfsClientGuardrails.canReadFromLocation(src); to avoid providing / in input.dirs conf
     checkOpen();
     try {
       return namenode.getFileInfo(src);

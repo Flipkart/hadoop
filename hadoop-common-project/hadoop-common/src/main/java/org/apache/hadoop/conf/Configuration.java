@@ -82,6 +82,7 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.alias.CredentialProvider;
 import org.apache.hadoop.security.alias.CredentialProvider.CredentialEntry;
 import org.apache.hadoop.security.alias.CredentialProviderFactory;
+import org.apache.hadoop.util.DfsClientConfigurationProvider;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.StringInterner;
 import org.apache.hadoop.util.StringUtils;
@@ -681,29 +682,6 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
     updatingResource = new HashMap<String, String[]>();
     synchronized(Configuration.class) {
       REGISTRY.put(this, null);
-    }
-    initializeWithDefaultFdpConfiguration();
-  }
-
-  private void initializeWithDefaultFdpConfiguration() {
-    if ( this.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF) == null) {
-      throw new RuntimeException("ProcessId not set");
-    }
-    try {
-      LOG.info(String.format("Creating instance of %s ",DfsClientConfigurationProvider.DFS_DEFAULT_CONF_CLASS_VALUE));
-      Class cls = Class.forName(DfsClientConfigurationProvider.DFS_DEFAULT_CONF_CLASS_VALUE);
-      if (!cls.isAssignableFrom(DfsClientConfigurationProvider.class)) {
-        throw new RuntimeException(String.format("%s does not implemented %s",cls.getName(),
-                DfsClientConfigurationProvider.class));
-      }
-      Constructor constructor =cls.getConstructor(Long.class);
-      Long processId = Long.parseLong(this.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF));
-      DfsClientConfigurationProvider dfsClientConfigurationProvider = (DfsClientConfigurationProvider)
-              constructor.newInstance(processId);
-      dfsClientConfigurationProvider.loadDefaultDfsConfiguration(this);
-    }
-    catch (Exception e) {
-      e.printStackTrace();
     }
   }
   

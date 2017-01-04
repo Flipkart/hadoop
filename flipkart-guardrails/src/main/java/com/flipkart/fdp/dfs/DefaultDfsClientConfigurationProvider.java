@@ -7,7 +7,7 @@ import com.flipkart.fdp.bagder.response.BadgerProcessDataResponse;
 import com.flipkart.fdp.util.JobConfigParser;
 import com.flipkart.fdp.utils.cfg.ConfigServiceImpl;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.conf.DfsClientConfigurationProvider;
+import org.apache.hadoop.util.DfsClientConfigurationProvider;
 
 import java.util.Map;
 
@@ -27,8 +27,10 @@ public class DefaultDfsClientConfigurationProvider implements DfsClientConfigura
         //TODO - config bucket name to be made configurable
         impl.initialize("prod-fdpflow-mrsrvc-a");
         BadgerConfiguration configuration = impl.getConfig(BadgerConfiguration.class);
-        BadgerProcessDataResponse response = BadgerHttpClient.get(Uri.getProcessData(configuration.getBadgerHostPort(),
-                badgerProcessId), BadgerProcessDataResponse.class);
+        String badgerUrl = "http://" + configuration.getBadgerHostPort();
+        BadgerHttpClient instance =  new BadgerHttpClient(badgerUrl);
+        BadgerProcessDataResponse response = instance.get(Uri.getProcessData(badgerProcessId),
+                BadgerProcessDataResponse.class);
         if (!JobConfigParser.validateJobConfig(response)) {
             throw new RuntimeException("Received invalid job config from badger");
         }

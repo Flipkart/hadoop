@@ -147,8 +147,9 @@ public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
       if (Constants.WHITE_LISTED_PROPERTIES.contains(inputProperty.getKey())){
         LOGGER.info(String.format("Whitelisted property found %s=%s", inputProperty.getKey(), inputProperyValue));
       }
-      if (inputProperty.getKey().startsWith(Constants.FDP_PLATFORM_PROPERTY_PREFIX)) {
-        //&& !inputProperty.getKey().equals(Constants.ADJUST_JOBCONFIG_CLASS)) {
+      if (inputProperty.getKey().startsWith(Constants.FDP_PLATFORM_PROPERTY_PREFIX) &&
+              !processDataProperties.containsKey(inputProperty.getKey())) {
+
         throw new RuntimeException(String.format("Exiting.. Unexpected property starting with %s found. %s=%s",
           Constants.FDP_PLATFORM_PROPERTY_PREFIX, inputProperty.getKey(), inputProperty.getValue() ));
       }

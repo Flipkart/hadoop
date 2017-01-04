@@ -74,6 +74,10 @@ public class Constants {
       add(MRJobConfig.MAP_OUTPUT_KEY_CLASS);
       add(MRJobConfig.MAP_OUTPUT_VALUE_CLASS);
       add(MRJobConfig.COMBINER_GROUP_COMPARATOR_CLASS);
+      /**
+       * adding this as it gets automatically set when we use {@link org.apache.hadoop.util.ToolRunner
+       */
+      add("mapreduce.client.genericoptionsparser.used");
     }
   };
 }

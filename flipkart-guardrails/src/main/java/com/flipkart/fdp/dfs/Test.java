@@ -16,7 +16,9 @@ public class Test
         impl.getAllKeys();
         BadgerConfiguration configuration = impl.getConfig(BadgerConfiguration.class);
         System.out.println(configuration.getBadgerHostPort());
-        BadgerProcessDataResponse response = BadgerHttpClient.get(Uri.getProcessData(configuration.getBadgerHostPort(),
+        String badgerUrl = "http://" + configuration.getBadgerHostPort();
+        BadgerHttpClient instance =  new BadgerHttpClient(badgerUrl);
+        BadgerProcessDataResponse response = instance.get(Uri.getProcessData(
                 11192l), BadgerProcessDataResponse.class);
         DefaultDfsClientConfigurationProvider pr = new DefaultDfsClientConfigurationProvider(11192l);
         pr.loadDefaultDfsConfiguration(new Configuration());
