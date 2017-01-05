@@ -81,7 +81,7 @@ public class ToolRunner {
         throw new RuntimeException(String.format("%s does not implemented %s",cls.getName(),
                 DfsClientConfigurationProvider.class));
       }
-      Constructor constructor =cls.getConstructor(Long.class);
+      Constructor constructor = cls.getConstructor(Long.class);
       Long processId = Long.parseLong(configuration.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF));
       DfsClientConfigurationProvider dfsClientConfigurationProvider = (DfsClientConfigurationProvider)
               constructor.newInstance(processId);

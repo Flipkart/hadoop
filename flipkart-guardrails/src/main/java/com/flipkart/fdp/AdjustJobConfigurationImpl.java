@@ -3,6 +3,13 @@ package com.flipkart.fdp;
 import java.io.IOException;
 import java.util.*;
 
+import com.flipkart.fdp.bagder.Uri;
+import com.flipkart.fdp.bagder.config.BadgerConfiguration;
+import com.flipkart.fdp.bagder.config.BadgerConfigurationFactory;
+import com.flipkart.fdp.bagder.http.BadgerHttpClient;
+import com.flipkart.fdp.bagder.http.ExponentialBackoffRetryPolicy;
+import com.flipkart.fdp.bagder.response.BadgerProcessDataResponse;
+import com.flipkart.fdp.util.JobConfigParser;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
@@ -16,36 +23,19 @@ import org.apache.hadoop.mapreduce.Job;
 
 public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
   private static final Log LOGGER = LogFactory.getLog(AdjustJobConfigurationImpl.class);
-  private final BadgerClient badgerClient;
+  private final BadgerHttpClient badgerHttpClient;
   private final Long badgerProcessID;
   private final Configuration fdpConf;
   private final Map<String, String> processDataProperties = new LinkedHashMap<String, String>();
-  private BadgerClient.BadgerProcessData badgerProcessData = null;
+  private BadgerProcessDataResponse badgerProcessData = null;
 
 
   private Map<String, String> fetchProperties(long processID) throws IOException {
-    Map<String, String> map = new HashMap<String, String>();
-    try {
-      badgerProcessData = badgerClient.getProcessDataDetails(processID);
-      String jobConfig = badgerProcessData.getJobConfig();
-      List<String> properties = Arrays.asList(jobConfig.split("\n"));
-      for (String property : properties) {
-        List<String> props = Arrays.asList(property.split(";"));
-        for (String prop : props) {
-          String[] strArr = prop.split("=");
-          if (strArr.length < 2) {
-            if (!prop.trim().equals("")) {
-              LOGGER.error(String.format("Invalid property %s found.. skipping..", prop));
-            }
-            continue;
-          }
-          map.put(strArr[0], strArr[1]);
-        }
-      }
-    return map;
-    } catch (Exception e) {
-      throw new IOException(e);
+    BadgerProcessDataResponse response = badgerHttpClient.get(Uri.getProcessData(processID), BadgerProcessDataResponse.class);
+    if (!JobConfigParser.validateJobConfig(response)) {
+      throw new RuntimeException("Received invalid job config from badger");
     }
+    return JobConfigParser.getConfigMap(response);
   }
 
   public AdjustJobConfigurationImpl(Long badgerProcessID)  {
@@ -62,7 +52,13 @@ public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
     conf.addResource("fk-fdp-mr-default-site.xml");
     conf.addResource("fk-fdp-mr-site.xml");
 
-    badgerClient = new BadgerClient(conf);
+    BadgerConfiguration configuration = BadgerConfigurationFactory.getBadgerConfiguration();
+    String badgerUrl = "http://" + configuration.getBadgerHostPort();
+    ExponentialBackoffRetryPolicy retryConfig = new ExponentialBackoffRetryPolicy(configuration.getRetryConfig().getMaxRetries(),
+            configuration.getRetryConfig().getMaxSleepInMs(), configuration.getRetryConfig().getBaseSleepInMs());
+    badgerHttpClient = new BadgerHttpClient(badgerUrl, retryConfig);
+
+    badgerProcessData = badgerHttpClient.get(Uri.getProcessData(badgerProcessID), BadgerProcessDataResponse.class);
 
     for (Map.Entry<String, String> property : conf) {
       processDataProperties.put(property.getKey(), property.getValue());
@@ -119,15 +115,6 @@ public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
 
   @Override
   public void adjustJobConfiguration(Configuration jobConf) {
-//    for (Map.Entry<String, String> inputProperty : jobConf) {
-//      LOGGER.info(String.format("JOBCONF %s=%s", inputProperty.getKey(), jobConf.get(inputProperty.getKey())));
-//      LOGGER.info(String.format("   FDPJobConf %s=%s", inputProperty.getKey(), fdpConf.get(inputProperty.getKey())));
-//    }
-//    for (Map.Entry<String, String> inputProperty : fdpConf) {
-//      LOGGER.info(String.format("FDPCONF %s=%s", inputProperty.getKey(), fdpConf.get(inputProperty.getKey())));
-//      LOGGER.info(String.format("   JobConf %s=%s", inputProperty.getKey(), jobConf.get(inputProperty.getKey())));
-//    }
-    //adjust configuration for jobs of type Constants.SUPPORTED_BADGER_JOB_TYPE
     if (!badgerProcessData.getType().equals(Constants.SUPPORTED_BADGER_JOB_TYPE)) {
       LOGGER.info(String.format("Job is of type %s, skipping Job Configuration Adjustment...",
         badgerProcessData.getType()));

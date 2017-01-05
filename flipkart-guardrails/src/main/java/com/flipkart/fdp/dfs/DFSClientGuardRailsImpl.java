@@ -31,16 +31,14 @@ public class DFSClientGuardRailsImpl implements DFSClientGuardrails, Runnable {
   private static final String YARN_APP_STAGING_DIR = "yarn.app.mapreduce.am.staging-dir";
   private static final String STAGING_DIR_SUFFIX = "/.staging";
 
-  long writeThreshHold;
-  long readThreshold;
-  List<String> inputDirs;
-  List<String> outputDirs;
-  List<String> whiteList;
-  boolean raiseException = false;
-  int raiseExceptionCounter = 0;
-  Configuration conf;
-  ScheduledExecutorService ses;
-  boolean ignoreGuardrails;
+  private long writeThreshHold;
+  private long readThreshold;
+  private List<String> inputDirs;
+  private List<String> outputDirs;
+  private List<String> whiteList;
+  private boolean raiseException = false;
+  private Configuration conf;
+  private boolean ignoreGuardrails;
 
   public DFSClientGuardRailsImpl(Configuration conf) throws IOException {
     // DFSClient instance is created by processes such as JobHistoryUtils, and those don't use Driver's JobConfig

@@ -1,4 +1,4 @@
-package com.flipkart.fdp;
+package com.flipkart.fdp.bagder.http;
 
 /**
  * Created by pranav.agarwal on 01/12/16.
@@ -23,7 +23,10 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.config.ClientConfig;
 
 
-
+/**
+ * Generic RestService client to connect to a specific url address and make api calls
+ *
+ */
 public class RestServiceClient {
 
   private static final Log LOGGER = LogFactory.getLog(RestServiceClient.class);
@@ -144,8 +147,6 @@ public class RestServiceClient {
 
   private WebResource getWebResource( String urlPath ) {
     String url = serviceBaseUrl + urlPath;
-    //LOGGER.finer( "URL is " + url );
-
     return getJerseyClient().resource( url );
   }
 
