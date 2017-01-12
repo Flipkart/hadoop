@@ -10,17 +10,17 @@ import org.apache.commons.logging.LogFactory;
 public class BadgerHttpClient
 {
     private static final Log LOG = LogFactory.getLog(BadgerHttpClient.class);
-    private static RestServiceClient s_rsc = null;
-    private String url;
+    private static RestServiceClient restServiceClient = null;
+    private String baseUrl;
     private ExponentialBackoffRetryPolicy retryPolicy;
 
     public BadgerHttpClient(String url, ExponentialBackoffRetryPolicy retryPolicy)
     {
-        this.url = url;
+        this.baseUrl = url;
         this.retryPolicy = retryPolicy;
-        if(s_rsc == null) {
+        if(restServiceClient == null) {
             synchronized (BadgerHttpClient.class) {
-                s_rsc = instantiateRestServiceClient(url);
+                restServiceClient = instantiateRestServiceClient(url);
             }
         }
     }
@@ -31,6 +31,7 @@ public class BadgerHttpClient
 
     public <T extends BadgerResponse> T get(final String uri, final Class<T> responseClazz)
     {
+        LOG.info(String.format("Calling badger service with URI: %s", baseUrl + uri));
         return executeWithRetry(HttpMethod.GET, uri, responseClazz);
     }
 
@@ -45,7 +46,7 @@ public class BadgerHttpClient
             }
             try {
                 LOG.info(String.format("Retry count : %s",retryCount));
-                return s_rsc.getRESTGetResponse(url, responseClazz);
+                return restServiceClient.getRESTGetResponse(url, responseClazz);
             }
             catch (Exception ex) {
                 exception = ex ;

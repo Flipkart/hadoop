@@ -2,6 +2,7 @@ package com.flipkart.fdp.bagder.config;
 
 import com.flipkart.fdp.utils.cfg.ConfigBucketKey;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
@@ -9,6 +10,7 @@ import lombok.Setter;
  *  Badger service will provide us the configs related to MR jobs
  */
 @ConfigBucketKey(name = "app")
+@NoArgsConstructor
 public class BadgerConfiguration
 {
     /**
@@ -26,8 +28,4 @@ public class BadgerConfiguration
     @ConfigBucketKey(name = "retryConfig")
     private RetryConfiguration retryConfig;
 
-    public BadgerConfiguration()
-    {
-
-    }
 }
