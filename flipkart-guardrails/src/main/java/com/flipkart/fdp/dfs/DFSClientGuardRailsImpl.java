@@ -154,7 +154,7 @@ public class DFSClientGuardRailsImpl implements DFSClientGuardrails, Runnable {
 
   @Override
   public void canReadFurther(String location, long alreadyRead) throws IOException {
-    LOGGER.info(String.format("canReadFurther validation call for %s, alreadyRead %s", location, alreadyRead));
+    LOGGER.debug(String.format("canReadFurther validation call for %s, alreadyRead %s", location, alreadyRead));
     if (ignoreGuardrails == true) {
       return;
     }
@@ -165,7 +165,7 @@ public class DFSClientGuardRailsImpl implements DFSClientGuardrails, Runnable {
   }
   @Override
   public void canWriteFurther(String location, long alreadyWritten) throws IOException {
-    LOGGER.info(String.format("canWriteFurther validation call for %s, alreadywritten %s", location, alreadyWritten));
+    LOGGER.debug(String.format("canWriteFurther validation call for %s, alreadywritten %s", location, alreadyWritten));
     if (ignoreGuardrails == true) {
       return;
     }

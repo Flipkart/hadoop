@@ -1,0 +1,5 @@
+#!/bin/bash
+set -x
+FDP_GUARDRAILS=/usr/share/fk-bigfoot-mr/share/hadoop/fdp-guardrails/lib/*:/usr/share/fk-bigfoot-mr/share/hadoop/fdp-guardrails/*:
+export HADOOP_CLASSPATH=${HADOOP_CLASSPATH}:${FDP_GUARDRAILS}
+exec /usr/share/fk-bigfoot-mr/bin/hadoop "$@"
