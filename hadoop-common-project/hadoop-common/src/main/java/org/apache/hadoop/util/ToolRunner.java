@@ -72,8 +72,11 @@ public class ToolRunner {
     return tool.run(toolArgs);
   }
   private static void initializeWithDefaultFdpConfiguration(Configuration configuration) {
-    if ( configuration.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF) == null) {
-      throw new RuntimeException("ProcessId not set");
+    if (configuration.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF) == null) {
+      throw new RuntimeException("badger.mapred.fact.processId property is not set");
+    }
+    if (configuration.get(DfsClientConfigurationProvider.BADGER_EXECUTIONID_CONF) == null) {
+      throw new RuntimeException("badger.mapred.fact.executionId property is not set");
     }
     try {
       Class cls = Class.forName(DfsClientConfigurationProvider.DFS_DEFAULT_CONF_CLASS_VALUE);
@@ -81,10 +84,11 @@ public class ToolRunner {
         throw new RuntimeException(String.format("%s does not implemented %s",cls.getName(),
                 DfsClientConfigurationProvider.class));
       }
-      Constructor constructor = cls.getConstructor(Long.class);
+      Constructor constructor = cls.getConstructor(Long.class, Long.class);
       Long processId = Long.parseLong(configuration.get(DfsClientConfigurationProvider.BADGER_PROCESSID_CONF));
+      Long executionId = Long.parseLong(configuration.get(DfsClientConfigurationProvider.BADGER_EXECUTIONID_CONF));
       DfsClientConfigurationProvider dfsClientConfigurationProvider = (DfsClientConfigurationProvider)
-              constructor.newInstance(processId);
+              constructor.newInstance(processId, executionId);
       dfsClientConfigurationProvider.loadDefaultDfsConfiguration(configuration);
     }
     catch (Exception e) {

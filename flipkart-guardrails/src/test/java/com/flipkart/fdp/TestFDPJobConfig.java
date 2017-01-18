@@ -10,7 +10,7 @@ import java.io.IOException;
  */
 public class TestFDPJobConfig {
   public static void main(String [] args) {
-    AdjustJobConfigurationImpl fc = new AdjustJobConfigurationImpl((Long) 11192l);
+    AdjustJobConfigurationImpl fc = new AdjustJobConfigurationImpl((Long) 11192l, 11192l);
     try {
       fc.adjustJobConfiguration((new Job(new Configuration(true))).getConfiguration());
     } catch (IOException e) {

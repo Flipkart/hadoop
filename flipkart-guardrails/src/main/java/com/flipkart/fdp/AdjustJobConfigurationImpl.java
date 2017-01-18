@@ -8,6 +8,7 @@ import com.flipkart.fdp.bagder.config.BadgerConfiguration;
 import com.flipkart.fdp.bagder.config.BadgerConfigurationFactory;
 import com.flipkart.fdp.bagder.http.BadgerHttpClient;
 import com.flipkart.fdp.bagder.http.ExponentialBackoffRetryPolicy;
+import com.flipkart.fdp.bagder.response.BadgerMrJobConfiguration;
 import com.flipkart.fdp.bagder.response.BadgerProcessDataResponse;
 import com.flipkart.fdp.util.JobConfigParser;
 import org.apache.commons.logging.Log;
@@ -25,21 +26,22 @@ public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
   private static final Log LOGGER = LogFactory.getLog(AdjustJobConfigurationImpl.class);
   private final BadgerHttpClient badgerHttpClient;
   private final Long badgerProcessID;
+  private final Long badgerExecutionId;
   private final Configuration fdpConf;
   private final Map<String, String> processDataProperties = new LinkedHashMap<String, String>();
   private BadgerProcessDataResponse badgerProcessData = null;
 
 
-  private Map<String, String> fetchProperties(long processID) throws IOException {
-    BadgerProcessDataResponse response = badgerHttpClient.get(Uri.getProcessData(processID), BadgerProcessDataResponse.class);
-    if (!JobConfigParser.validateJobConfig(response)) {
-      throw new RuntimeException("Received invalid job config from badger");
-    }
-    return JobConfigParser.getConfigMap(response);
+  private Map<String, String> fetchProperties() throws IOException {
+    BadgerMrJobConfiguration mrJobConfiguration = badgerHttpClient.get(Uri.getJobConfig(badgerExecutionId, badgerProcessID),
+            BadgerMrJobConfiguration.class);
+    Map<String, String> confMap = mrJobConfiguration.getEnv();
+    return confMap;
   }
 
-  public AdjustJobConfigurationImpl(Long badgerProcessID)  {
+  public AdjustJobConfigurationImpl(Long badgerProcessID, Long badgerExecutionId)  {
     this.badgerProcessID = badgerProcessID;
+    this.badgerExecutionId = badgerExecutionId;
     Job j;
     try {
       j = new Job(new Configuration());
@@ -64,7 +66,7 @@ public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
       processDataProperties.put(property.getKey(), property.getValue());
     }
     try {
-      processDataProperties.putAll(fetchProperties(this.badgerProcessID));
+      processDataProperties.putAll(fetchProperties());
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -194,14 +196,5 @@ public class AdjustJobConfigurationImpl implements AdjustJobConfiguration {
         jobConf.set(property.getKey(), property.getValue(), "Badger processData property");
     }
     jobConf.set(Constants.PASS_THROUGH, "false");
-  }
-  public static void main(String[] args) throws IOException {
-
-    AdjustJobConfigurationImpl fc = new AdjustJobConfigurationImpl((Long) 72760l);
-    try {
-      fc.adjustJobConfiguration((new Job(new Configuration(true))).getConfiguration());
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
   }
 }

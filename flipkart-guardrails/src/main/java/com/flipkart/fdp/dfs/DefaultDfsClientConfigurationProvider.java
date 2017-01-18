@@ -5,6 +5,7 @@ import com.flipkart.fdp.bagder.config.BadgerConfigurationFactory;
 import com.flipkart.fdp.bagder.http.BadgerHttpClient;
 import com.flipkart.fdp.bagder.http.ExponentialBackoffRetryPolicy;
 import com.flipkart.fdp.bagder.Uri;
+import com.flipkart.fdp.bagder.response.BadgerMrJobConfiguration;
 import com.flipkart.fdp.bagder.response.BadgerProcessDataResponse;
 import com.flipkart.fdp.util.JobConfigParser;
 import org.apache.hadoop.conf.Configuration;
@@ -17,15 +18,17 @@ import java.util.Map;
  */
 public class DefaultDfsClientConfigurationProvider implements DfsClientConfigurationProvider
 {
-    private Long badgerProcessId;
+    private final Long badgerProcessId;
+    private final Long badgerExecutionId;
 
-    public DefaultDfsClientConfigurationProvider(Long badgerProcessId)
+    public DefaultDfsClientConfigurationProvider(Long badgerProcessId, Long badgerExecutionId)
     {
         this.badgerProcessId = badgerProcessId;
+        this.badgerExecutionId = badgerExecutionId;
     }
 
     /**
-     * Method to add {@link BadgerProcessDataResponse.jobConfig} into current {@link Configuration}
+     * Method to add {@link BadgerMrJobConfiguration.env} into current {@link Configuration}
      * This calls badger service , gets the jobConfig , validates it and finally populates current
      * {@link Configuration}
      * @param jobConf
@@ -39,12 +42,9 @@ public class DefaultDfsClientConfigurationProvider implements DfsClientConfigura
         ExponentialBackoffRetryPolicy retryConfig = new ExponentialBackoffRetryPolicy(configuration.getRetryConfig().getMaxRetries(),
                 configuration.getRetryConfig().getMaxSleepInMs(), configuration.getRetryConfig().getBaseSleepInMs());
         BadgerHttpClient instance = new BadgerHttpClient(badgerUrl, retryConfig);
-        BadgerProcessDataResponse response = instance.get(Uri.getProcessData(badgerProcessId), BadgerProcessDataResponse.class);
-
-        if (!JobConfigParser.validateJobConfig(response)) {
-            throw new RuntimeException("Received invalid job config from badger");
-        }
-        Map<String, String> confMap = JobConfigParser.getConfigMap(response);
+        BadgerMrJobConfiguration mrJobConfiguration = instance.get(Uri.getJobConfig(badgerExecutionId, badgerProcessId),
+                BadgerMrJobConfiguration.class);
+        Map<String, String> confMap = mrJobConfiguration.getEnv();
         populateBadgerConfs(jobConf, confMap);
 
     }

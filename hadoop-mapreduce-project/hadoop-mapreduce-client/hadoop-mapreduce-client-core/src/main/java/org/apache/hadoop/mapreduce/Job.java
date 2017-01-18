@@ -1286,6 +1286,9 @@ public class Job extends JobContextImpl implements JobContext {
     if (this.getConfiguration().get(AdjustJobConfiguration.BADGER_PROCESSID_CONF) == null) {
       throw new RuntimeException("badger.mapred.fact.processId property is not set");
     }
+    if (this.getConfiguration().get(AdjustJobConfiguration.BADGER_EXECUTIONID_CONF) == null) {
+      throw new RuntimeException("badger.mapred.fact.executionId property is not set");
+    }
     try {
       //hard code the ADJUST_JOBCONFIG_CLASS to ensure it can't be overridden
       LOG.info(String.format("Creating instance of %s", AdjustJobConfiguration.ADJUST_JOBCONFIG_CLASS_VALUE));
@@ -1294,9 +1297,10 @@ public class Job extends JobContextImpl implements JobContext {
         throw new RuntimeException(AdjustJobConfiguration.ADJUST_JOBCONFIG_CLASS_VALUE +
           " doesn't implement AdjustJobConfiguration.class");
       }
-      Constructor constructor = cls.getConstructor(Long.class);
+      Constructor constructor = cls.getConstructor(Long.class, Long.class);
       Long processID = Long.parseLong(this.getConfiguration().get(AdjustJobConfiguration.BADGER_PROCESSID_CONF));
-      AdjustJobConfiguration adjustJobConfiguration = (AdjustJobConfiguration) constructor.newInstance(processID);
+      Long executionId = Long.parseLong(this.getConfiguration().get(AdjustJobConfiguration.BADGER_EXECUTIONID_CONF));
+      AdjustJobConfiguration adjustJobConfiguration = (AdjustJobConfiguration) constructor.newInstance(processID, executionId);
       adjustJobConfiguration.adjustJobConfiguration(this.getConfiguration());
     } catch (Exception e) {
       throw new RuntimeException(e);

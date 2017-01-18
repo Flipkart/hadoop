@@ -5,6 +5,7 @@ import com.flipkart.fdp.bagder.config.BadgerConfigurationFactory;
 import com.flipkart.fdp.bagder.http.BadgerHttpClient;
 import com.flipkart.fdp.bagder.http.ExponentialBackoffRetryPolicy;
 import com.flipkart.fdp.bagder.Uri;
+import com.flipkart.fdp.bagder.response.BadgerMrJobConfiguration;
 import com.flipkart.fdp.bagder.response.BadgerProcessDataResponse;
 
 public class TestDefaultDfsClientConfigurationProvider
@@ -17,6 +18,8 @@ public class TestDefaultDfsClientConfigurationProvider
         ExponentialBackoffRetryPolicy retryPolicy = new ExponentialBackoffRetryPolicy(configuration.getRetryConfig().getMaxRetries(),
                 configuration.getRetryConfig().getMaxSleepInMs(), configuration.getRetryConfig().getBaseSleepInMs());
         BadgerHttpClient instance =  new BadgerHttpClient(badgerUrl, retryPolicy);
+        BadgerMrJobConfiguration conf = instance.get(Uri.getJobConfig(285168l, 77671l),BadgerMrJobConfiguration.class);
+        System.out.println(conf);
         BadgerProcessDataResponse response = instance.get(Uri.getProcessData(
                 11192l), BadgerProcessDataResponse.class);
         System.out.println("aa");

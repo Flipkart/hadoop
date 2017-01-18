@@ -47,8 +47,7 @@ public class Constants {
     }
   };
 
-  public static final String SUPPORTED_BADGER_JOB_TYPE = "CMD";
-  //TODO: setup a new type for MR jobs in Badger
+  public static final String SUPPORTED_BADGER_JOB_TYPE = "MR";
 
   static final Set<String> WHITE_LISTED_PROPERTIES = new HashSet<String>() {
     {
@@ -78,6 +77,7 @@ public class Constants {
        * adding this as it gets automatically set when we use {@link org.apache.hadoop.util.ToolRunner
        */
       add("mapreduce.client.genericoptionsparser.used");
+      add("config.bucket.name");
     }
   };
 }
