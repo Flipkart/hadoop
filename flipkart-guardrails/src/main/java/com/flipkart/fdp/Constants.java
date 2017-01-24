@@ -78,6 +78,8 @@ public class Constants {
        */
       add("mapreduce.client.genericoptionsparser.used");
       add("config.bucket.name");
+      add("mapreduce.input.fileinputformat.inputdir");
+      add("mapreduce.output.fileoutputformat.outputdir");
     }
   };
 }
