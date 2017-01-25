@@ -17,7 +17,7 @@ cd $LOCAL_DIR
 
 MVN=`which mvn`
 
-$MVN install
+$MVN install -Pdist -Dtar -DskipTests -Dmaven.javadoc.skip=true
 
 MVN_STATUS=$?
 [ $MVN_STATUS -eq 0 ] ||  exit $MVN_STATUS
