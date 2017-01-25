@@ -1,0 +1,36 @@
+#!/bin/bash
+set -x
+
+function die()
+{
+	echo "ERROR: $1 " >&2
+	exit 1
+}
+
+[ -z "$LOCAL_DIR" ] && die "LOCAL_DIR not specified"
+[ -z "$TARGET" ]  && die "No package target specified"
+[ -z "$PACKAGE" ] && die "No package name specified"
+[ ! -d $LOCAL_DIR ] && die "$LOCAL_DIR doesnot exist"
+
+DEB_DIR="$LOCAL_DIR/deb"
+cd $LOCAL_DIR
+
+MVN=`which mvn`
+
+$MVN install
+
+MVN_STATUS=$?
+[ $MVN_STATUS -eq 0 ] ||  exit $MVN_STATUS
+
+BASE_DIR="/usr/share/$PACKAGE/"
+mdkir "$DEB_DIR" && cd "$DEB_DIR"
+cp -r $LOCAL_DIR/package/DEBIAN .
+
+mkdir -p .$BASE_DIR
+cp -r ./hadoop-dist/target/hadoop-2.6.0/* .$BASE_DIR
+cp run_hadoop .$BASE_DIR/hadoop
+
+chmod +x .$BASE_DIR/hadoop
+
+find . -type f -exec sed -i "s/__PACKAGE__/$PACKAGE/g; s/_VERSION_/$VERSION/g; s/__TARGET__/$TARGET/g";
+

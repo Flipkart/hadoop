@@ -1,0 +1,11 @@
+#!/bin/bash
+set -e
+
+CMD="$1"
+PACKAGE=__PACKAGE__
+
+if [ "$CMD" == "purge" ]; then
+	rm -rf /usr/share/$PACKAGE
+fi
+
+

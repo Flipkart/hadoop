@@ -1,0 +1,8 @@
+Package: __PACKAGE__
+Version: 1._VERSION_
+Priority: standard
+Section: flipkart/analytics
+Depends: oracle-java8-jdk
+Architecture: all
+Maintainer: fdp-frameworks-devs@flipkart.com
+Description: FDP version of hadoop to run MR jobs with guardrails
