@@ -24,7 +24,7 @@ MVN_STATUS=$?
 
 BASE_DIR="/usr/share/$PACKAGE/"
 mkdir -p "$DEB_DIR" && cd "$DEB_DIR"
-cp -r $LOCAL_DIR/DEBIAN .
+cp -r $LOCAL_DIR/package/DEBIAN .
 
 mkdir -p .$BASE_DIR
 cp -r $LOCAL_DIR/hadoop-dist/target/hadoop-2.6.0/* .$BASE_DIR
