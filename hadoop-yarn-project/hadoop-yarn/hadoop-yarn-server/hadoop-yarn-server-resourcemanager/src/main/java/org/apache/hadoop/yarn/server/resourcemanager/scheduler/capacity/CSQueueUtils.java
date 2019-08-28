@@ -68,11 +68,11 @@ class CSQueueUtils {
     for (String label : queueCapacities.getExistingNodeLabels()) {
       float capacity = queueCapacities.getCapacity(label);
       float maximumCapacity = queueCapacities.getMaximumCapacity(label);
-      if (capacity > maximumCapacity) {
-        throw new IllegalArgumentException("Illegal queue capacity setting, "
-            + "(capacity=" + capacity + ") > (maximum-capacity="
-            + maximumCapacity + "). When label=[" + label + "]");
-      }
+      // Only, absCapacity <= absMaximumCapacity should be checked as relative capacity and relative maximum capacity
+      // have no relation
+      // E.g. Parent Queue has Relative Capacity 30% and Relative Max Capacity 60%, while child queue has relative
+      // Capacity 100% and Relative Max Capacity 60%. Absolute Capacity of Child queue is still 30% and
+      // absolute Maximum Capacity is 36% which is valid.
      
       // Actually, this may not needed since we have verified capacity <=
       // maximumCapacity. And the way we compute absolute capacity (abs(x) =
