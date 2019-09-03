@@ -64,6 +64,13 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>flipkart.nm.art</id>
+      <url>http://artifactory.nm.flipkart.com:8081/artifactory</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <licenses>
