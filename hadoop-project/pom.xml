@@ -1391,6 +1391,7 @@
           </execution>
         </executions>
         <configuration>
+	   <skip>true</skip>
           <signature>
             <groupId>org.codehaus.mojo.signature</groupId>
             <artifactId>java17</artifactId>
