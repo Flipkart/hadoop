@@ -1,4 +1,4 @@
-Package: fk-hadoop-tar-test-source
+Package: fk-hadoop-tar-push-source
 Version: 3.1.1-1.0.0
 Section: flipkart/base-hadoop-infra-builder
 Priority: standard
