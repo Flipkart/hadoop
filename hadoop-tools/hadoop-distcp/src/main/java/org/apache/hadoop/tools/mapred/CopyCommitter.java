@@ -319,7 +319,7 @@ public class CopyCommitter extends FileOutputCommitter {
                                       SequenceFile.Reader.file(sourceListing));
     long totalLen = clusterFS.getFileStatus(sourceListing).getLen();
 
-    Path targetRoot = new Path(conf.get(DistCpConstants.CONF_LABEL_TARGET_WORK_PATH));
+    Path targetRoot = new Path(conf.get(DistCpConstants.CONF_LABEL_TARGET_FINAL_PATH));
 
     long preservedEntries = 0;
     try {
