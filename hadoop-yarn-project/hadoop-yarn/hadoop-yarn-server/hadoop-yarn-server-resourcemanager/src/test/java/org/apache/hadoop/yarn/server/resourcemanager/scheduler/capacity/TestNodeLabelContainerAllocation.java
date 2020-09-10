@@ -25,9 +25,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.metrics2.MetricsSystem;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
 import org.apache.hadoop.yarn.api.records.ContainerId;
 import org.apache.hadoop.yarn.api.records.NodeId;
@@ -47,11 +49,14 @@ import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainer;
 import org.apache.hadoop.yarn.server.resourcemanager.rmcontainer.RMContainerState;
 import org.apache.hadoop.yarn.server.resourcemanager.rmnode.RMNode;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.AppSchedulingInfo;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.QueueMetrics;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.ResourceScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerAppReport;
 
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerNode;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.SchedulerNodeReport;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.TestPartitionQueueMetrics;
+import org.apache.hadoop.yarn.server.resourcemanager.scheduler.TestQueueMetrics;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.YarnScheduler;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerApp;
 import org.apache.hadoop.yarn.server.resourcemanager.scheduler.common.fica.FiCaSchedulerNode;
@@ -2008,6 +2013,8 @@ public class TestNodeLabelContainerAllocation {
     csConf.setCapacityByLabel(queueB, "x", 50);
     csConf.setMaximumCapacityByLabel(queueB, "x", 50);
 
+    csConf.setBoolean(CapacitySchedulerConfiguration.ENABLE_USER_METRICS, true);
+
     // set node -> label
     mgr.addToCluserNodeLabels(
         ImmutableSet.of(NodeLabel.newInstance("x", false)));
@@ -2026,6 +2033,54 @@ public class TestNodeLabelContainerAllocation {
     rm1.start();
     MockNM nm1 = rm1.registerNode("h1:1234", 10 * GB); // label = x
     MockNM nm2 = rm1.registerNode("h2:1234", 10 * GB); // label = <no_label>
+    CapacityScheduler cs = (CapacityScheduler) rm1.getResourceScheduler();
+    RMNode rmNode1 = rm1.getRMContext().getRMNodes().get(nm1.getNodeId());
+    SchedulerNode schedulerNode1 = cs.getSchedulerNode(nm1.getNodeId());
+    RMNode rmNode2 = rm1.getRMContext().getRMNodes().get(nm2.getNodeId());
+    SchedulerNode schedulerNode2 = cs.getSchedulerNode(nm2.getNodeId());
+    for (int i = 0; i < 50; i++) {
+      cs.handle(new NodeUpdateSchedulerEvent(rmNode1));
+    }
+    for (int i = 0; i < 50; i++) {
+      cs.handle(new NodeUpdateSchedulerEvent(rmNode2));
+    }
+    double delta = 0.0001;
+    CSQueue leafQueue = cs.getQueue("a");
+    CSQueue leafQueueB = cs.getQueue("b");
+    CSQueue rootQueue = cs.getRootQueue();
+    assertEquals(10 * GB, rootQueue.getMetrics().getAvailableMB(), delta);
+    assertEquals(2.5 * GB, leafQueue.getMetrics().getAvailableMB(), delta);
+    assertEquals(7.5 * GB, leafQueueB.getMetrics().getAvailableMB(), delta);
+
+    MetricsSystem ms = leafQueueB.getMetrics().getMetricsSystem();
+    QueueMetrics partXMetrics =
+        (QueueMetrics) TestPartitionQueueMetrics.partitionSource(ms, "x");
+    QueueMetrics partDefaultMetrics =
+        (QueueMetrics) TestPartitionQueueMetrics.partitionSource(ms, "");
+    QueueMetrics queueAMetrics =
+        (QueueMetrics) TestQueueMetrics.queueSource(ms, "root.a");
+    QueueMetrics queueBMetrics =
+        (QueueMetrics) TestQueueMetrics.queueSource(ms, "root.b");
+    QueueMetrics queueAPartDefaultMetrics =
+        (QueueMetrics) TestPartitionQueueMetrics.queueSource(ms, "", "root.a");
+    QueueMetrics queueAPartXMetrics =
+        (QueueMetrics) TestPartitionQueueMetrics.queueSource(ms, "x", "root.a");
+    QueueMetrics queueBPartDefaultMetrics =
+        (QueueMetrics) TestPartitionQueueMetrics.queueSource(ms, "", "root.b");
+    QueueMetrics queueBPartXMetrics =
+        (QueueMetrics) TestPartitionQueueMetrics.queueSource(ms, "x", "root.b");
+    QueueMetrics rootMetrics =
+        (QueueMetrics) TestQueueMetrics.queueSource(ms, "root");
+    assertEquals(10 * GB, partXMetrics.getAvailableMB(), delta);
+    assertEquals(10 * GB, partDefaultMetrics.getAvailableMB(), delta);
+    assertEquals(2.5 * GB, queueAPartDefaultMetrics.getAvailableMB(), delta);
+    assertEquals(7.5 * GB, queueBPartDefaultMetrics.getAvailableMB(), delta);
+    assertEquals(5 * GB, queueAPartXMetrics.getAvailableMB(), delta);
+    assertEquals(5 * GB, queueBPartXMetrics.getAvailableMB(), delta);
+    assertEquals(10 * GB, rootMetrics.getAvailableMB(), delta);
+    assertEquals(2.5 * GB, queueAMetrics.getAvailableMB(), delta);
+    assertEquals(7.5 * GB, queueBMetrics.getAvailableMB(), delta);
+
     // app1 -> a
     RMApp app1 = rm1.submitApp(1 * GB, "app", "user", null, "a");
     MockAM am1 = MockRM.launchAndRegisterAM(app1, rm1, nm2);
