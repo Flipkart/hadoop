@@ -468,7 +468,7 @@ public class FSAppAttempt extends SchedulerApplicationAttempt
 
       // Update consumption and track allocations
       List<ResourceRequest> resourceRequestList = appSchedulingInfo.allocate(
-          type, node, schedulerKey, rmContainer);
+          type, node, schedulerKey, container);
       this.attemptResourceUsage.incUsed(container.getResource());
       getQueue().incUsedResource(container.getResource());
 

@@ -81,7 +81,7 @@ public class FifoAppAttempt extends FiCaSchedulerApp {
 
       // Update consumption and track allocations
       List<ResourceRequest> resourceRequestList = appSchedulingInfo.allocate(
-          type, node, schedulerKey, rmContainer);
+          type, node, schedulerKey, container);
 
       attemptResourceUsage.incUsed(node.getPartition(),
           container.getResource());
