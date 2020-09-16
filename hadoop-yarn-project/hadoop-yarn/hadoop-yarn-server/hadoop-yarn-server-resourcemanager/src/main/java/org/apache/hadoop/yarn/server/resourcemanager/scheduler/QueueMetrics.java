@@ -47,6 +47,7 @@ import org.apache.hadoop.yarn.server.resourcemanager.nodelabels.RMNodeLabelsMana
 import org.apache.hadoop.yarn.server.resourcemanager.rmapp.RMAppState;
 import org.apache.hadoop.yarn.server.utils.BuilderUtils;
 import org.slf4j.Logger;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Splitter;
@@ -91,6 +92,8 @@ public class QueueMetrics implements MetricsSource {
   @Metric("Reserved CPU in virtual cores") MutableGaugeInt reservedVCores;
   @Metric("# of reserved containers") MutableGaugeInt reservedContainers;
 
+  protected static final MetricsInfo PARTITION_INFO = 
+      info("Partition", "Metrics by partition");
   private final MutableGaugeInt[] runningTime;
   private TimeBucketMetrics<ApplicationId> runBuckets;
 
